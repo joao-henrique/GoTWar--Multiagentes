@@ -1,6 +1,7 @@
 package BeyondTheWall;
-import jade.core.Agent;
+import java.util.Random;
 
+import jade.core.Agent;
 import jade.wrapper.AgentController;
 import jade.wrapper.PlatformController;
 
@@ -14,7 +15,9 @@ public class WildPeople extends Agent {
 
 		PlatformController container = getContainerController();
 		for (int i = 0; i < 10; i++){
-			String localName = "Warrior_" + i;
+			Random rand = new Random();
+			int id = rand.nextInt(99);
+			String localName = "Warrior_" + id;
 			try {
 				AgentController zombie = container.createNewAgent(localName, "BeyondTheWall.Human", null);
 				zombie.start();

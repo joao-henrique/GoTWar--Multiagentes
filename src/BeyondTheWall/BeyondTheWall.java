@@ -1,5 +1,7 @@
 package BeyondTheWall;
 import jade.core.Agent;
+
+import java.util.Random;
 import java.util.Vector;
 
 import jade.wrapper.AgentController;
@@ -19,7 +21,12 @@ public class BeyondTheWall extends Agent {
 
 		PlatformController container = getContainerController();
 		for (int i = 0; i < 10; i++){
-			String localName = "Zombie_" + i;
+			
+			
+			Random rand = new Random();
+			int id = rand.nextInt(9988888);
+			String localName = "Zombie_" + id;
+			
 			try {
 				AgentController zombie = container.createNewAgent(localName, "BeyondTheWall.Walker", null);
 				zombie.start();

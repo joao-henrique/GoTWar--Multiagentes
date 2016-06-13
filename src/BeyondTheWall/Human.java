@@ -7,6 +7,7 @@ import jade.lang.acl.ACLMessage;
 import jade.wrapper.AgentController;
 import jade.wrapper.PlatformController;
 import jade.core.AID;
+
 import java.util.Random;
 
 public class Human extends Agent {
@@ -145,26 +146,36 @@ public class Human extends Agent {
 	
 	//Metodo que "transforma" um agente human em walker
 	private void dieAndComeBack (){
+		
+		addBehaviour(new OneShotBehaviour() {
+			private static final long serialVersionUID = 1L;
+
+			public void action() {
+				String localName = getLocalName() + "_Zombie";
+				PlatformController container = getContainerController();
+				try {
+					//Criando um walker para substituir o Human que foi infectado
+					AgentController walker = container.createNewAgent(localName, "BeyondTheWall.Walker", null);
+					walker.start();
+				} catch (Exception e){
+					System.out.println("Error while turning into walker: " + e);
+					e.printStackTrace();
+				}
+					//Removendo das lista de alvos
+					BeyondTheWall.potentialVictims.remove(mockup);
+					BeyondTheWall.potentialVictimsS.remove(this);
+					doDelete();
+				
+			}
+		});
 		 
-		String localName = getLocalName() + "_Zombie";
-		PlatformController container = getContainerController();
-		try {
-			//Criando um walker para substituir o Human que foi infectado
-			AgentController walker = container.createNewAgent(localName, "BeyondTheWall.Walker", null);
-			walker.start();
-		} catch (Exception e){
-			System.out.println("Error while turning into walker: " + e);
-			e.printStackTrace();
-		}
-			//Removendo das lista de alvos
-			BeyondTheWall.potentialVictims.remove(mockup);
-			BeyondTheWall.potentialVictimsS.remove(this);
-			doDelete();
+	
 	}
 
 	//Criando a mensagem de atack aos Walkers
 	private void atack (AID walker){
 		Random rand = new Random();
+		
 		//Calculando a chance de acerto
 		int chance = rand.nextInt(99);
 			if (chance <= 45){
@@ -176,5 +187,7 @@ public class Human extends Agent {
 			} else {
 				System.out.println(this.getLocalName()+": Droga!! errei!");
 			} 
+	
+	
 	}
 }
