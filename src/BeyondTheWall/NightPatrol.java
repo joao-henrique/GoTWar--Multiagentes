@@ -1,35 +1,17 @@
 package BeyondTheWall;
 
-import jade.core.Agent;
-import jade.core.behaviours.*;
-import jade.lang.acl.ACLMessage;
-//import jade.domain.FIPAException;
-import jade.wrapper.AgentController;
-import jade.wrapper.PlatformController;
 import jade.core.AID;
+import jade.core.behaviours.CyclicBehaviour;
+import jade.core.behaviours.TickerBehaviour;
+import jade.lang.acl.ACLMessage;
 
 import java.util.Random;
 
-public class Human extends Agent {
-
-	private static final long serialVersionUID = 1L;
-	int gPositionX;
-	int gPositionY;
-	protected AID mockup = null;
-	final int SPEED = 4;
-	boolean walking = true;
-	boolean avoiding = false;
+public class NightPatrol extends Human {
 
 	
-	public int getGPositionX(){
-		return this.gPositionX;
-	}
-
-	public int getGPositionY(){
-		return this.gPositionY;
-	}
-
-	int pathX = SPEED, pathY = SPEED;
+	
+	private static final long serialVersionUID = 1L;
 
 	protected void setup (){
 		
@@ -39,9 +21,8 @@ public class Human extends Agent {
 		index = BeyondTheWall.potentialVictimsS.indexOf(this);
 		BeyondTheWall.potentialVictims.add(index, thisHuman);
 		mockup = thisHuman;
-		System.out.println (this.getLocalName()+": É luta ou morrer !" );
-		
-		
+				
+		System.out.println (this.getLocalName()+":  The Winter is Coming" );
 		
 		//Comportamento de recebimento de mensagens
 		addBehaviour (new CyclicBehaviour (this) {
@@ -57,7 +38,7 @@ public class Human extends Agent {
 					if (msg.getPerformative() == ACLMessage.REQUEST) {
 						String content = msg.getContent();
 						if (content != null && content.indexOf("slash") != -1) {
-							System.out.println(this.getAgent().getLocalName()+":  Noooooooooooooooooooooooooooooooo!!!!!!!        Human convertido á walker   " );
+							System.out.println(this.getAgent().getLocalName()+":  E agora sua vigília tem fim!!!!!!!     Patrulheiro convertido á walker   " );
 							dieAndComeBack();
 						} else if (content != null && content.indexOf("search") != -1) {
 							reply.setPerformative(ACLMessage.INFORM);
@@ -144,51 +125,21 @@ public class Human extends Agent {
 			}
 		});
 	}
-	
-	//Metodo que "transforma" um agente human em walker
-	void dieAndComeBack (){
 		
-		addBehaviour(new OneShotBehaviour() {
-			private static final long serialVersionUID = 1L;
-
-			public void action() {
-				String localName = getLocalName() + "_Zombie";
-				PlatformController container = getContainerController();
-				try {
-					//Criando um walker para substituir o Human que foi infectado
-					AgentController walker = container.createNewAgent(localName, "BeyondTheWall.Walker", null);
-					walker.start();
-				} catch (Exception e){
-					System.out.println("Error while turning into walker: " + e);
-					e.printStackTrace();
-				}
-					//Removendo das lista de alvos
-					BeyondTheWall.potentialVictims.remove(mockup);
-					BeyondTheWall.potentialVictimsS.remove(this);
-					doDelete();
-				
-			}
-		});
-		 
-	
-	}
-
-	//Criando a mensagem de atack aos Walkers
-	private void atack (AID walker){
+	protected void atack(AID walker) {
+		
 		Random rand = new Random();
 		
 		//Calculando a chance de acerto
 		int chance = rand.nextInt(99);
-			if (chance <= 45){
-				System.out.println(this.getLocalName()+":   *Morra seu verme!*");
-				ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
-				msg.setContent("atack");
+			if (chance <= 80){
+				System.out.println(this.getLocalName()+":  *Morra walker*");
+				ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);	
+				msg.setContent("atack-night-patrol");
 				msg.addReceiver(walker);
 				send(msg);
 			} else {
-				System.out.println(this.getLocalName()+": Droga!! errei!");
+				System.out.println(this.getLocalName()+": Precisando de mais treinamento");
 			} 
-	
-	
 	}
 }

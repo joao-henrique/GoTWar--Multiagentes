@@ -39,6 +39,7 @@ public class Walker extends Agent {
 		BeyondTheWall.hordeS.add(this);
 		index = BeyondTheWall.hordeS.indexOf(this);
 		BeyondTheWall.horde.add(index, thisZombie);
+		
 		mockup = thisZombie;
 		System.out.println (this.getLocalName()+":  Uuuurgggh........." );
 		
@@ -53,10 +54,14 @@ public class Walker extends Agent {
 					if (msg.getPerformative() == ACLMessage.REQUEST){
 						String content = msg.getContent();
 						if (content != null && content.indexOf("atack") != -1) {
-							
-							dieAndDontComeBack();
+							dieAndDontComeBack(1);
 						}
-
+						if (content != null && content.indexOf("atack-wild") != -1) {
+							dieAndDontComeBack(2);
+						}
+						if (content != null && content.indexOf("atack-night-patrol") != -1) {
+							dieAndDontComeBack(3);
+						}
 					}
 				}
 				
@@ -127,7 +132,7 @@ public class Walker extends Agent {
 		});
 
 		//Comportamento que simula a movimentação e walkers não se cansam
-		addBehaviour (new TickerBehaviour (this, 5000) {
+		addBehaviour (new TickerBehaviour (this, 50) {
 			
 			private static final long serialVersionUID = 1L;
 			Random random = new Random();
@@ -162,8 +167,9 @@ public class Walker extends Agent {
 		slash.addReceiver(human);
 		send(slash);
 	}
-	private void dieAndDontComeBack(){
-		resistence --;
+	
+	private void dieAndDontComeBack(int atack){
+		resistence = resistence - atack;
 		if (resistence == 0){
 			BeyondTheWall.horde.remove(mockup);
 			BeyondTheWall.hordeS.remove(this);
