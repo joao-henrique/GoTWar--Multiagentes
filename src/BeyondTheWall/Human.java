@@ -19,6 +19,7 @@ public class Human extends Agent {
 	final int SPEED = 4;
 	boolean walking = true;
 	boolean avoiding = false;
+	private boolean dead = false;
 
 	
 	public int getGPositionX(){
@@ -28,16 +29,23 @@ public class Human extends Agent {
 	public int getGPositionY(){
 		return this.gPositionY;
 	}
+	
+	public boolean isDead() {
+		return dead;
+	}
+
+
+	public void setDead(boolean dead) {
+		this.dead = dead;
+	}
 
 	int pathX = SPEED, pathY = SPEED;
 
 	protected void setup (){
 		
 		AID thisHuman = new AID(getLocalName(), AID.ISLOCALNAME);
-		int index = 0;
 		BeyondTheWall.potentialVictimsS.add(this);
-		index = BeyondTheWall.potentialVictimsS.indexOf(this);
-		BeyondTheWall.potentialVictims.add(index, thisHuman);
+		BeyondTheWall.potentialVictims.add(this);
 		mockup = thisHuman;
 		System.out.println (this.getLocalName()+": É luta ou morrer !" );
 		
@@ -48,7 +56,7 @@ public class Human extends Agent {
 		
 			private static final long serialVersionUID = 1L;
 
-			public void action() {
+			public synchronized void action() {
 		
 				ACLMessage msg = myAgent.receive();
 				if (msg != null){
@@ -58,7 +66,9 @@ public class Human extends Agent {
 						String content = msg.getContent();
 						if (content != null && content.indexOf("slash") != -1) {
 							System.out.println(this.getAgent().getLocalName()+":  Noooooooooooooooooooooooooooooooo!!!!!!!        Human convertido á walker   " );
+							Human.this.setDead(true);
 							dieAndComeBack();
+							System.out.println("Depois do DIEANDCOMEBACK ************" + this.getAgent().getLocalName());
 						} else if (content != null && content.indexOf("search") != -1) {
 							reply.setPerformative(ACLMessage.INFORM);
 							reply.setContent("" + gPositionX);
@@ -101,7 +111,8 @@ public class Human extends Agent {
 									//avançar eixo y
 									pathY = +SPEED;
 								//Caso estiver em uma posição adjacente a ele ataca
-								atack((AID) BeyondTheWall.horde.elementAt(BeyondTheWall.hordeS.indexOf(walker)));
+								Walker target = BeyondTheWall.horde.elementAt(BeyondTheWall.hordeS.indexOf(walker));
+								atack(target);
 							}
 						} 
 					}
@@ -146,12 +157,18 @@ public class Human extends Agent {
 	}
 	
 	//Metodo que "transforma" um agente human em walker
-	void dieAndComeBack (){
+	synchronized void dieAndComeBack (){
 		
 		addBehaviour(new OneShotBehaviour() {
 			private static final long serialVersionUID = 1L;
 
-			public void action() {
+			 public void action() {
+				//Removendo das lista de alvos
+				BeyondTheWall.potentialVictims.remove(mockup);
+				BeyondTheWall.potentialVictimsS.remove(this);
+				takeDown();
+				doDelete();
+				
 				String localName = getLocalName() + "_Zombie";
 				PlatformController container = getContainerController();
 				try {
@@ -162,11 +179,8 @@ public class Human extends Agent {
 					System.out.println("Error while turning into walker: " + e);
 					e.printStackTrace();
 				}
-					//Removendo das lista de alvos
-					BeyondTheWall.potentialVictims.remove(mockup);
-					BeyondTheWall.potentialVictimsS.remove(this);
-					doDelete();
-				
+				System.out.println("Durante do DIEANDCOMEBACK --------------" + localName);
+
 			}
 		});
 		 
@@ -174,7 +188,7 @@ public class Human extends Agent {
 	}
 
 	//Criando a mensagem de atack aos Walkers
-	private void atack (AID walker){
+	private void atack (Walker walker){
 		Random rand = new Random();
 		
 		//Calculando a chance de acerto
@@ -183,7 +197,7 @@ public class Human extends Agent {
 				System.out.println(this.getLocalName()+":   *Morra seu verme!*");
 				ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
 				msg.setContent("atack");
-				msg.addReceiver(walker);
+				msg.addReceiver(walker.getAID());
 				send(msg);
 			} else {
 				System.out.println(this.getLocalName()+": Droga!! errei!");

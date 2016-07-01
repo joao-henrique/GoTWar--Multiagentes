@@ -9,16 +9,12 @@ import jade.lang.acl.ACLMessage;
 
 public class WildPerson extends Human {
 
-
 	private static final long serialVersionUID = 1L;
 
 protected void setup (){
-		
 		AID thisHuman = new AID(getLocalName(), AID.ISLOCALNAME);
-		int index = 0;
 		BeyondTheWall.potentialVictimsS.add(this);
-		index = BeyondTheWall.potentialVictimsS.indexOf(this);
-		BeyondTheWall.potentialVictims.add(index, thisHuman);
+		BeyondTheWall.potentialVictims.add(this);
 		mockup = thisHuman;
 		
 		System.out.println (this.getLocalName()+":  Os selvagens tem coragem" );
@@ -29,7 +25,7 @@ protected void setup (){
 		
 			private static final long serialVersionUID = 1L;
 
-			public void action() {
+			public synchronized void action() {
 		
 				ACLMessage msg = myAgent.receive();
 				if (msg != null){
@@ -39,7 +35,9 @@ protected void setup (){
 						String content = msg.getContent();
 						if (content != null && content.indexOf("slash") != -1) {
 							System.out.println(this.getAgent().getLocalName()+":  Noooooooooooooooooooooooooooooooo!!!!!!!        Human convertido á walker   " );
+							WildPerson.this.setDead(true);
 							dieAndComeBack();
+							System.out.println("Depois do DIEANDCOMEBACK ************" + this.getAgent().getLocalName());
 						} else if (content != null && content.indexOf("search") != -1) {
 							reply.setPerformative(ACLMessage.INFORM);
 							reply.setContent("" + gPositionX);
@@ -82,7 +80,8 @@ protected void setup (){
 									//avançar eixo y
 									pathY = +SPEED;
 								//Caso estiver em uma posição adjacente a ele ataca
-								atack((AID) BeyondTheWall.horde.elementAt(BeyondTheWall.hordeS.indexOf(walker)));
+								Walker target = BeyondTheWall.horde.elementAt(BeyondTheWall.hordeS.indexOf(walker));
+								atack(target);
 							}
 						} 
 					}
@@ -104,43 +103,46 @@ protected void setup (){
 			private static final long serialVersionUID = 1L;
 			int positionX = 200, positionY = 50;
 			public void onTick() {
-				if (pathX > 0) {
-					if (positionX > 898 - 25) 
-						pathX = -pathX;
-				} else {
-					if (positionX < 0)
-						pathX = -pathX;
-				}
-				if (pathY > 0) {
-					if (positionY > 274 - 25) 
-						pathY = -pathY;
-				} else {
-					if (positionY < 0)
-						pathY = -pathY;
-				}
-				positionX += pathX;
-				positionY += pathY;
-				gPositionX = positionX;
-				gPositionY = positionY;
+				if(!WildPerson.this.isDead()){
+					if (pathX > 0) {
+						if (positionX > 898 - 25) 
+							pathX = -pathX;
+					} else {
+						if (positionX < 0)
+							pathX = -pathX;
+					}
+					if (pathY > 0) {
+						if (positionY > 274 - 25) 
+							pathY = -pathY;
+					} else {
+						if (positionY < 0)
+							pathY = -pathY;
+					}
+					positionX += pathX;
+					positionY += pathY;
+					gPositionX = positionX;
+					gPositionY = positionY;
+				}	
 			}
 		});
 	}
 
 		
-	protected void atack(AID walker) {
-		
-		Random rand = new Random();
-		
-		//Calculando a chance de acerto
-		int chance = rand.nextInt(99);
-			if (chance <= 65){
-				System.out.println(this.getLocalName()+":   *Morra seu Demônio!*");
-				ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);	
-				msg.setContent("atack-wild");
-				msg.addReceiver(walker);
-				send(msg);
-			} else {
-				System.out.println(this.getLocalName()+": Droga!! errei!");
-			} 
+	protected void atack(Walker walker) {
+		if(!WildPerson.this.isDead()){
+			Random rand = new Random();
+			
+			//Calculando a chance de acerto
+			int chance = rand.nextInt(99);
+				if (chance <= 65){
+					System.out.println(this.getLocalName()+":   *Morra seu Demônio!*" + walker.getLocalName());
+					ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);	
+					msg.setContent("atack-wild");
+					msg.addReceiver(walker.getAID());
+					send(msg);
+				} else {
+					System.out.println(this.getLocalName()+": Droga!! errei!");
+				} 
+		}
 	}
 }

@@ -19,7 +19,7 @@ public class Walker extends Agent {
 	private static boolean chasing = false;
 	private static boolean eating = false;
 	private int gPositionX, gPositionY;
-	private final int SPEED = 3;
+	private final int SPEED = 5;
 	private int resistence = 3;
 	private AID mockup = null;
 
@@ -35,10 +35,8 @@ public class Walker extends Agent {
 
 	protected void setup() {
 		AID thisZombie = new AID(getLocalName(),AID.ISLOCALNAME);
-		int index = 0;
 		BeyondTheWall.hordeS.add(this);
-		index = BeyondTheWall.hordeS.indexOf(this);
-		BeyondTheWall.horde.add(index, thisZombie);
+		BeyondTheWall.horde.add(this);
 		
 		mockup = thisZombie;
 		System.out.println (this.getLocalName()+":  Uuuurgggh........." );
@@ -121,7 +119,7 @@ public class Walker extends Agent {
 					
 					if (eating){
 						int index = BeyondTheWall.potentialVictimsS.indexOf(human);
-						AID humanTarget = (AID) BeyondTheWall.potentialVictims.get(index);
+						Human humanTarget = BeyondTheWall.potentialVictims.get(index);
 						slashAndInfect(humanTarget);
 						humanTarget = null;
 						eating = false;
@@ -161,11 +159,14 @@ public class Walker extends Agent {
 
 	}
 
-	private void slashAndInfect(AID human){
-		ACLMessage slash = new ACLMessage(ACLMessage.REQUEST);
-		slash.setContent("slash");
-		slash.addReceiver(human);
-		send(slash);
+	private void slashAndInfect(Human human){
+		if(!human.isDead()){
+			ACLMessage slash = new ACLMessage(ACLMessage.REQUEST);
+			slash.setContent("slash");
+			System.out.println(this.getLocalName() + " Batendo nestes malditos "+ human.getLocalName());
+			slash.addReceiver(human.getAID());
+			send(slash);
+		}
 	}
 	
 	private void dieAndDontComeBack(int atack){

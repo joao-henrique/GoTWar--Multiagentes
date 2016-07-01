@@ -16,10 +16,8 @@ public class NightPatrol extends Human {
 	protected void setup (){
 		
 		AID thisHuman = new AID(getLocalName(), AID.ISLOCALNAME);
-		int index = 0;
 		BeyondTheWall.potentialVictimsS.add(this);
-		index = BeyondTheWall.potentialVictimsS.indexOf(this);
-		BeyondTheWall.potentialVictims.add(index, thisHuman);
+		BeyondTheWall.potentialVictims.add(this);
 		mockup = thisHuman;
 				
 		System.out.println (this.getLocalName()+":  The Winter is Coming" );
@@ -29,7 +27,7 @@ public class NightPatrol extends Human {
 		
 			private static final long serialVersionUID = 1L;
 
-			public void action() {
+			public synchronized void action() {
 		
 				ACLMessage msg = myAgent.receive();
 				if (msg != null){
@@ -39,7 +37,9 @@ public class NightPatrol extends Human {
 						String content = msg.getContent();
 						if (content != null && content.indexOf("slash") != -1) {
 							System.out.println(this.getAgent().getLocalName()+":  E agora sua vigília tem fim!!!!!!!     Patrulheiro convertido á walker   " );
+							NightPatrol.this.setDead(true);
 							dieAndComeBack();
+							System.out.println("Depois do DIEANDCOMEBACK ************" + this.getAgent().getLocalName());
 						} else if (content != null && content.indexOf("search") != -1) {
 							reply.setPerformative(ACLMessage.INFORM);
 							reply.setContent("" + gPositionX);
@@ -82,7 +82,8 @@ public class NightPatrol extends Human {
 									//avançar eixo y
 									pathY = +SPEED;
 								//Caso estiver em uma posição adjacente a ele ataca
-								atack((AID) BeyondTheWall.horde.elementAt(BeyondTheWall.hordeS.indexOf(walker)));
+								Walker target = BeyondTheWall.horde.elementAt(BeyondTheWall.hordeS.indexOf(walker));
+								atack(target);
 							}
 						} 
 					}
@@ -126,17 +127,17 @@ public class NightPatrol extends Human {
 		});
 	}
 		
-	protected void atack(AID walker) {
+	protected void atack(Walker walker) {
 		
 		Random rand = new Random();
 		
 		//Calculando a chance de acerto
 		int chance = rand.nextInt(99);
-			if (chance <= 80){
+			if (chance <= 20){
 				System.out.println(this.getLocalName()+":  *Morra walker*");
 				ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);	
 				msg.setContent("atack-night-patrol");
-				msg.addReceiver(walker);
+				msg.addReceiver(walker.getAID());
 				send(msg);
 			} else {
 				System.out.println(this.getLocalName()+": Precisando de mais treinamento");

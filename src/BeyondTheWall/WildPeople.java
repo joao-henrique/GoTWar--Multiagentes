@@ -12,23 +12,9 @@ public class WildPeople extends Agent {
 	private static final long serialVersionUID = 1L;
 
 	protected void setup (){
-
-		PlatformController container = getContainerController();
-		for (int i = 0; i < 5; i++){
-			Random rand = new Random();
-			int id = rand.nextInt(99);
-			String localName = "Human_" + id;
-			try {
-				AgentController zombie = container.createNewAgent(localName, "BeyondTheWall.Human", null);
-				zombie.start();
-			} catch (Exception e){
-				System.out.println("Error while turning into human: " + e);
-				e.printStackTrace();
-			}
-		}
 		
 		PlatformController containerWild = getContainerController();
-		for (int i = 0; i < 5; i++){
+		for (int i = 0; i < 10; i++){
 			Random rand = new Random();
 			int id = rand.nextInt(99);
 			String localName = "Wild_" + id;
@@ -42,7 +28,7 @@ public class WildPeople extends Agent {
 		}
 		
 		PlatformController containerNightPatrol = getContainerController();
-		for (int i = 0; i < 5; i++){
+		for (int i = 0; i < 10; i++){
 			Random rand = new Random();
 			int id = rand.nextInt(99);
 			String localName = "NightPatrol_" + id;
@@ -51,6 +37,21 @@ public class WildPeople extends Agent {
 				zombie.start();
 			} catch (Exception e){
 				System.out.println("Error while turning into NightPatrol: " + e);
+				e.printStackTrace();
+			}
+		}
+		
+		PlatformController container = getContainerController();
+		for (int i = 0; i < 20; i++){
+			Random rand = new Random();
+			int id = rand.nextInt(9988888);
+			String localName = "Zombie_" + id;
+			
+			try {
+				AgentController zombie = container.createNewAgent(localName, "BeyondTheWall.Walker", null);
+				zombie.start();
+			} catch (Exception e){
+				System.out.println("Error while turning into zombie: " + e);
 				e.printStackTrace();
 			}
 		}
